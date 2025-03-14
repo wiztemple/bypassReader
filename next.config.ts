@@ -1,12 +1,3 @@
-// import type { NextConfig } from "next";
-
-// const nextConfig: NextConfig = {
-//   /* config options here */
-// };
-
-// export default nextConfig;
-
-// ==== next.config.js ====
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -15,13 +6,13 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/proxy',
-        destination: '/api/proxy',
+        source: "/proxy",
+        destination: "/api/proxy",
       },
       {
-        source: '/bypass/:path*',
-        destination: '/client-bypass?url=:path*',
-      }
+        source: "/bypass/:path*",
+        destination: "/client-bypass?url=:path*",
+      },
     ];
   },
 };
