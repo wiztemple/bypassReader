@@ -2,29 +2,29 @@
 export interface BypassResult {
   serviceUrl: string;
   serviceName: string;
-  serviceId: string; // Added this property to the interface
+  serviceId: string;
 }
 
 /**
  * Map of domains to their corresponding bypass services
  */
 const DOMAIN_BYPASS_MAP: Record<string, { service: string; name: string }> = {
-  // Medium sites
-  "medium.com": { service: "scribe", name: "Scribe.rip" },
-  "towardsdatascience.com": { service: "scribe", name: "Scribe.rip" },
-  "betterprogramming.pub": { service: "scribe", name: "Scribe.rip" },
-  "uxdesign.cc": { service: "scribe", name: "Scribe.rip" },
-  "bettermarketing.pub": { service: "scribe", name: "Scribe.rip" },
-  "levelup.gitconnected.com": { service: "scribe", name: "Scribe.rip" },
+  // Medium sites - updated to use Archive Buttons
+  "medium.com": { service: "archivebuttons", name: "Archive Buttons" },
+  "towardsdatascience.com": { service: "archivebuttons", name: "Archive Buttons" },
+  "betterprogramming.pub": { service: "archivebuttons", name: "Archive Buttons" },
+  "uxdesign.cc": { service: "archivebuttons", name: "Archive Buttons" },
+  "bettermarketing.pub": { service: "archivebuttons", name: "Archive Buttons" },
+  "levelup.gitconnected.com": { service: "archivebuttons", name: "Archive Buttons" },
 
   // NYT and related
   "nytimes.com": { service: "12ft", name: "12ft.io" },
   "nyt.com": { service: "12ft", name: "12ft.io" },
 
-  // Financial publications
+  // Financial publications - WSJ/FT updated to use Archive Buttons
   "economist.com": { service: "archive.is", name: "Archive.is" },
-  "ft.com": { service: "archive.is", name: "Archive.is" },
-  "wsj.com": { service: "archive.ph", name: "Archive.ph" },
+  "ft.com": { service: "archivebuttons", name: "Archive Buttons" },
+  "wsj.com": { service: "archivebuttons", name: "Archive Buttons" },
   "forbes.com": { service: "12ft", name: "12ft.io" },
 
   // News sites
@@ -122,6 +122,9 @@ function createBypassUrl(url: string, service: string): string {
 
     case "archive.ph":
       return `https://archive.ph/${url}`;
+      
+    case "archivebuttons":
+      return `https://www.archivebuttons.com/${url}`;
 
     case "12ft":
     default:

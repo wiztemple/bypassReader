@@ -38,6 +38,31 @@ export default function Home() {
     }
   }, []);
 
+  // Helper function to create service URL - moved to the top to avoid the error
+  const createServiceUrl = (targetUrl: string, service: string): string => {
+    switch (service) {
+      case "scribe":
+        try {
+          const urlObj = new URL(targetUrl);
+          return `https://scribe.rip${urlObj.pathname}`;
+        } catch {
+          return `https://scribe.rip/${targetUrl.replace(
+            /^https?:\/\/(www\.)?medium\.com\//,
+            ""
+          )}`;
+        }
+      case "archive.is":
+        return `https://archive.is/${targetUrl}`;
+      case "archive.ph":
+        return `https://archive.ph/${targetUrl}`;
+      case "archivebuttons":
+        return `https://www.archivebuttons.com/${targetUrl}`;
+      case "12ft":
+      default:
+        return `https://12ft.io/${targetUrl}`;
+    }
+  };
+
   // Handle form submission
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -67,6 +92,41 @@ export default function Home() {
         hostname = hostname.substring(4);
       }
 
+      // Check if it's a Medium site - needs special handling
+      const isMedium =
+        hostname === "medium.com" ||
+        hostname.endsWith(".medium.com") ||
+        hostname === "towardsdatascience.com" ||
+        hostname === "betterprogramming.pub" ||
+        hostname === "uxdesign.cc" ||
+        hostname === "bettermarketing.pub" ||
+        hostname === "levelup.gitconnected.com";
+
+      // For Medium, always use Archive.ph
+      if (isMedium) {
+        const serviceUrl = `https://archive.ph/${formattedUrl}`;
+        const serviceName = "Archive.ph";
+        const serviceId = "archive.ph";
+
+        setLastRedirect(`${serviceName}: ${serviceUrl}`);
+        setLastService(serviceId);
+        recordAttempt(hostname, serviceId);
+
+        // Save to recent URLs
+        const updatedRecentUrls = [
+          formattedUrl,
+          ...recentUrls.filter((u) => u !== formattedUrl),
+        ].slice(0, 10);
+        setRecentUrls(updatedRecentUrls);
+        localStorage.setItem("recent_urls", JSON.stringify(updatedRecentUrls));
+
+        // Open in new tab
+        window.open(serviceUrl, "_blank");
+        setLoading(false);
+        return;
+      }
+
+      // For non-Medium sites, follow the normal flow
       // Check cache first
       const cachedResult = getCachedService(formattedUrl);
       let serviceResult;
@@ -82,6 +142,8 @@ export default function Home() {
             ? "Archive.is"
             : cachedResult.service === "archive.ph"
             ? "Archive.ph"
+            : cachedResult.service === "archivebuttons"
+            ? "Archive Buttons"
             : "Unknown";
 
         serviceResult = {
@@ -112,6 +174,8 @@ export default function Home() {
                 ? "Archive.is"
                 : recommendedService === "archive.ph"
                 ? "Archive.ph"
+                : recommendedService === "archivebuttons"
+                ? "Archive Buttons"
                 : "Unknown",
             serviceId: recommendedService,
           };
@@ -177,29 +241,6 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error processing feedback:", error);
-    }
-  };
-
-  // Helper function to create service URL
-  const createServiceUrl = (targetUrl: string, service: string): string => {
-    switch (service) {
-      case "scribe":
-        try {
-          const urlObj = new URL(targetUrl);
-          return `https://scribe.rip${urlObj.pathname}`;
-        } catch {
-          return `https://scribe.rip/${targetUrl.replace(
-            /^https?:\/\/(www\.)?medium\.com\//,
-            ""
-          )}`;
-        }
-      case "archive.is":
-        return `https://archive.is/${targetUrl}`;
-      case "archive.ph":
-        return `https://archive.ph/${targetUrl}`;
-      case "12ft":
-      default:
-        return `https://12ft.io/${targetUrl}`;
     }
   };
 
@@ -273,7 +314,7 @@ export default function Home() {
                       <button
                         type="button"
                         onClick={handleClearInput}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-800 hover:text-gray-600 bg-transparent border-none cursor-pointer p-1 rounded-full hover:bg-gray-50"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-1 rounded-full hover:bg-gray-50"
                         aria-label="Clear input"
                       >
                         <X size={16} />
@@ -290,10 +331,10 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={loading || !url}
-                  className={`w-full py-3 px-4 rounded-3xl text-white font-normal transition-colors focus:outline-none
+                  className={`w-full py-3 px-4 text-white font-normal transition-colors focus:outline-none
                     ${
                       loading || !url
-                        ? "bg-gray-300 text-gray-400 cursor-not-allowed"
+                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                         : "bg-gray-900 hover:bg-black"
                     }`}
                 >
@@ -384,6 +425,14 @@ export default function Home() {
                         </button>
                         <button
                           onClick={() => {
+                            window.open(`https://archive.ph/${url}`, "_blank");
+                          }}
+                          className="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 transition-colors"
+                        >
+                          Try Archive.ph
+                        </button>
+                        <button
+                          onClick={() => {
                             try {
                               const urlObj = new URL(url);
                               window.open(
@@ -427,7 +476,7 @@ export default function Home() {
               Supported Publications
             </h2>
 
-            <div className="max-w-4xl mx-auto bg-white rounded-lg overflow-hidden border border-gray-100">
+            <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
               <table className="min-w-full divide-y divide-gray-100">
                 <thead className="bg-gray-50">
                   <tr>
@@ -458,7 +507,7 @@ export default function Home() {
                       Medium and Medium publications
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      Scribe.rip
+                      Archive.ph
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {analytics.domainStats["medium.com"] ? (
@@ -503,7 +552,7 @@ export default function Home() {
                   {/* Economist */}
                   <tr>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
-                      The Economist, Financial Times
+                      The Economist
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       Archive.is
@@ -525,13 +574,13 @@ export default function Home() {
                     </td>
                   </tr>
 
-                  {/* WSJ */}
+                  {/* WSJ and FT */}
                   <tr>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
-                      Wall Street Journal
+                      Wall Street Journal, Financial Times
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      Archive.ph
+                      Archive Buttons
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {analytics.domainStats["wsj.com"] ? (

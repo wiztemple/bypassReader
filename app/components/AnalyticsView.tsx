@@ -98,6 +98,8 @@ export default function AnalyticsView({ analytics }: AnalyticsViewProps) {
                       ? "Archive.is"
                       : service === "archive.ph"
                       ? "Archive.ph"
+                      : service === "archivebuttons"
+                      ? "Archive Buttons"
                       : service;
 
                   return (
@@ -172,6 +174,8 @@ export default function AnalyticsView({ analytics }: AnalyticsViewProps) {
                       ? "Archive.is"
                       : stats.bestService === "archive.ph"
                       ? "Archive.ph"
+                      : stats.bestService === "archivebuttons"
+                      ? "Archive Buttons"
                       : stats.bestService;
 
                   return (
