@@ -246,23 +246,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white font-sans">
-      <style jsx global>{`
-        /* Hide datalist dropdown indicator */
-        input::-webkit-calendar-picker-indicator {
-          display: none !important;
-          opacity: 0;
-        }
-
-        input[list]::-webkit-list-button {
-          display: none !important;
-        }
-
-        /* Apply 12ft.io font family */
-        body {
-          font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-            Roboto, sans-serif;
-        }
-      `}</style>
       <header className="bg-white border-b border-gray-100 py-6">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
@@ -331,7 +314,7 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={loading || !url}
-                  className={`w-full py-3 px-4 text-white font-normal transition-colors focus:outline-none
+                  className={`w-full py-3 px-4 text-white font-normal rounded-4xl transition-colors focus:outline-none
                     ${
                       loading || !url
                         ? "bg-gray-200 text-gray-400 cursor-not-allowed"
